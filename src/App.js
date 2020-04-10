@@ -3,7 +3,9 @@ import {WEBGL} from './CheckWebGL'
 import './App.css';
 import WebAudioContextProvider from './WebAudioContextProvider'
 import AudioNodesContextProvider from './AudioNodesContextProvider'
+import Scene from './Scene'
 import AudioEngine from './AudioEngine'
+import Workbench from './Workbench'
 
 // import {StateContext, defaultState} from './StateContext'
 // import Workbench from './workbench'
@@ -16,6 +18,7 @@ const App = () => {
       <WebAudioContextProvider>
         <AudioNodesContextProvider>
           <AudioEngine/>
+          <Scene className="workbench" controller={Workbench}/>
         </AudioNodesContextProvider>
       </WebAudioContextProvider>
     </div>
@@ -29,27 +32,6 @@ const App = () => {
 
 
 // class App extends Component {
-//   constructor(props) {
-//     super(props)
-
-//     // initialize audio context
-//     this.setupAudioContext()
-    
-//     this.state = {
-//       audio: {
-//         context: this.audioContext,
-//         analyzer: this.audioContext.createAnalyzer(),
-//       }
-//     }
-//   }
-
-//   setupAudioContext = () => {
-//     // handle legacy browsers
-//     const AudioContext = window.AudioContext || window.webkitAudioContext
-
-//     // initialize audio context
-//     this.audioContext = new AudioContext()
-//   }
 
   
 //   render() {
