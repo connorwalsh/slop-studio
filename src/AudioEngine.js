@@ -1,13 +1,10 @@
-import React from 'react'
 import {useAudioNodesContext} from './AudioNodesContextProvider'
 
 
 const AudioEngine = props => {
   const nodes = useAudioNodesContext()
   
-  return (
-    <div className="OKOK">{nodes.context.baseLatency}</div>
-  )
+  return null
 }
 
 

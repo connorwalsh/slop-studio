@@ -1,4 +1,5 @@
 .Visualizer {
+    border: 1px red solid;
     background-color: white;
     min-height: 10vh;
     display: flex;

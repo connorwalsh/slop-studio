@@ -16,7 +16,7 @@ class Scene extends Component {
     // scene controller component is ready to be rendered.
     //
     // 'ready' means that all the three.js objects (scene, camera, renderer, etc.) are
-    // defined and will be available once the child component (scene conntroller) is rendered.
+    // defined and will be available once the child component (scene controller) is rendered.
     this.state = {ready: false}
 
     // setup initial configuration
@@ -32,11 +32,15 @@ class Scene extends Component {
         }
       }
     }
+
+    // objects is a map of objects which are registered with the scene via addObject
+    // these objects all must implement the update() method which is run on each animation frame.
+    // the map is keyed by the objects id.
+    this.modules = {}
   }
   
   componentDidMount() {
     this.setupScene()
-    this.addSceneObjects()
     this.animate()
 
     // make responsive on window resize
@@ -100,22 +104,10 @@ class Scene extends Component {
     this.container.appendChild( this.renderer.domElement );
   }
   
-  addSceneObjects = () => {
-    // const geometry = new THREE.BoxGeometry( 1, 1, 1 );
-    // const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-    var geometry = new THREE.TorusGeometry(10,3,16,100);
-    var material = new THREE.MeshBasicMaterial( { wireframe: true, color: 0xf5428d } );
-    this.cube = new THREE.Mesh( geometry, material );
-
-    // add cube to scene
-    this.scene.add( this.cube );
-  }
-  
   animate = () => {
-    // update all objects in scene
-    this.cube.rotation.x += 0.07;
-    this.cube.rotation.y += 0.07;
 
+    Object.values(this.modules).forEach(module => module.update())
+    
     // render scene using effect composer (which wraps this.renderer)
     this.composer.render()
 
@@ -124,11 +116,20 @@ class Scene extends Component {
     // whenever we are not in this current browser window/tab.
     this.requestID = window.requestAnimationFrame(this.animate);
   }
+
+  addModule = module => {
+    this.modules[module.name] = module
+    module.addObjects(this.scene)
+  }
   
   render() {
-    // TODO rename this and add more stuff to this "bundle"
-    const bundle = {
+    
+    const ctx = {
       scene: this.scene,
+      camera: this.camera,
+      renderer: this.renderer,
+      composer: this.composer,
+      addModule: this.addModule,
     }
 
     // get the controller for this scene (a React component passed in as a prop)
@@ -138,7 +139,7 @@ class Scene extends Component {
     const scene = WEBGL.isWebGLAvailable() ?
           (
             <div className={this.props.className} ref={ ref => (this.container = ref) }>
-              {this.state.ready ? <Controller bundle={bundle}/> : null}
+              {this.state.ready ? <Controller ctx={ctx}/> : null}
             </div>
           )
           : (

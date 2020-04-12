@@ -1,5 +1,8 @@
-import React, {useState, createContext, useContext} from 'react'
+import React, {useState, useEffect, createContext, useContext} from 'react'
+import {Subject, BehaviorSubject} from 'rxjs'
 import {useWebAudioContext} from './WebAudioContextProvider'
+import {createModuleReducer} from './AudioModuleReducer'
+
 
 
 // react context for AudioNodes state
@@ -11,7 +14,7 @@ export const AudioNodesContext = createContext()
 export const useAudioNodesContext = () => {
   const context = useContext(AudioNodesContext)
   if (context === undefined) {
-    throw new Error(`useAudioNodesContext must be called within AudioNodesConntextProvider!`)
+    throw new Error(`useAudioNodesContext must be called within AudioNodesContextProvider!`)
   }
 
   return context
@@ -22,23 +25,41 @@ export const useAudioNodesContext = () => {
 const AudioNodesContextProvider = props => {
   const [context] = useState(useWebAudioContext())
   const [analyzer] = useState(context.createAnalyser())
+  const [moduleEvents] = useState(new BehaviorSubject(null))
+  const [modules, updateModules] = useState({})
+  
+  const [actions] = useState(new Subject())
 
-  // get the WebAudio API Context.
-  // this means this provider must be nested within the WebAudioContextProvider.
-  // setContext(useWebAudioContext())
+  useEffect(() => {
+    const moduleReducer = createModuleReducer(context, moduleEvents)
+    const subscription = actions.subscribe(action => {
+      updateModules(moduleReducer(modules, action))
+    })
+    return () => subscription.unsubscribe()
+  }, [actions, modules, context, moduleEvents])
 
-  // initailize audio graph
+  useEffect(() => {
+    actions.next({
+      type: 'MODULE_ADDED',
+      config: { type: 'master'},      
+    })
+  }, [actions])
 
-  // setup reducers to maintain state
+  // dispatch wrapper to send actions over the wire
+  // TODO eventually use Websocket connection from a provider!
+  const dispatch = action => {
+    // TODO send message over the wire
+    // ws.emit(action)
 
-  // just quick.....TODO revise this.
-  // setup analyzer
-  // const analyzer = context.createAnalyser()
-  analyzer.connect(context.destination) // hook up analyzer to destination
+    // add action to action observable stream
+    actions.next(action)
+  }
 
+
+  // oscillator.start()
   
   return (
-    <AudioNodesContext.Provider value={{context, analyzer}}>
+    <AudioNodesContext.Provider value={{context, analyzer, modules, dispatch, moduleEvents}}>
       {props.children}
     </AudioNodesContext.Provider>
   )

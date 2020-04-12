@@ -1,11 +1,12 @@
 import React from 'react';
-import {WEBGL} from './CheckWebGL'
 import './App.css';
 import WebAudioContextProvider from './WebAudioContextProvider'
 import AudioNodesContextProvider from './AudioNodesContextProvider'
 import Scene from './Scene'
 import AudioEngine from './AudioEngine'
+import Visualizer from './Visualizer'
 import Workbench from './Workbench'
+import Toolbar from './Toolbar'
 
 // import {StateContext, defaultState} from './StateContext'
 // import Workbench from './workbench'
@@ -18,7 +19,9 @@ const App = () => {
       <WebAudioContextProvider>
         <AudioNodesContextProvider>
           <AudioEngine/>
+          <Scene className="Visualizer" controller={Visualizer}/>
           <Scene className="workbench" controller={Workbench}/>
+          <Toolbar/>
         </AudioNodesContextProvider>
       </WebAudioContextProvider>
     </div>
